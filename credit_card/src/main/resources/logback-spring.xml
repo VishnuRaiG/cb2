@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="10 seconds">
+
+	<springProperty scope="context" name="logPath" source="logs.path" defaultValue="./logs"/>
+	<property name="LOG_HOME" value="${logPath}"/>
+	<property name="PATTERN" value="[%-5level] [%date{yyyy-MM-dd HH:mm:ss.SSS}] [%thread] %logger{50} [%line] - %msg%n"/>
+
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>${PATTERN}</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+
+	<appender name="credit_card" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_HOME}/credit_card.log</file>
+		<append>true</append>
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_HOME}/credit_card.log.%d{yyyy-MM-dd}.%i</fileNamePattern>
+			<maxFileSize>1GB</maxFileSize>
+			<MaxHistory>7</MaxHistory>
+			<totalSizeCap>3GB</totalSizeCap>
+			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+		</rollingPolicy>
+		<encoder>
+			<Pattern>${PATTERN}</Pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+
+	<appender name="async-credit_card" class="ch.qos.logback.classic.AsyncAppender">
+		<discardingThreshold>0</discardingThreshold>
+		<queueSize>1024</queueSize>
+		<neverBlock>true</neverBlock>
+		<appender-ref ref="credit_card"/>
+	</appender>
+
+	<logger name="SBC.credit_card" additivity="false">
+		<level value="DEBUG"/>
+		<appender-ref ref="CONSOLE"/>
+		<appender-ref ref="async-credit_card"/>
+	</logger>
+
+	<root>
+		<level value="INFO"/>
+		<appender-ref ref="CONSOLE"/>
+		<appender-ref ref="async-credit_card"/>
+	</root>
+</configuration>
